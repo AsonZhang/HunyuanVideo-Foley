@@ -274,7 +274,7 @@ def run_api_server(model_dict, cfg, args):
         output_video_path = os.path.join(args.output_dir, f"{video_name}_with_audio.mp4")
         save_video = data.get("save_video", args.save_video)
 
-        if not video_path or not prompt:
+        if not video_path:
             return jsonify({"error": "video_path and prompt are required"}), 400
 
         try:
