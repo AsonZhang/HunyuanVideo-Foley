@@ -272,6 +272,7 @@ def run_api_server(model_dict, cfg, args):
         video_name = os.path.splitext(os.path.basename(video_path))[0]
         output_audio_path = os.path.join(args.output_dir, f"{video_name}_generated.wav")
         output_video_path = os.path.join(args.output_dir, f"{video_name}_with_audio.mp4")
+        save_video = data.get("save_video", args.save_video)
 
         if not video_path or not prompt:
             return jsonify({"error": "video_path and prompt are required"}), 400
@@ -285,7 +286,7 @@ def run_api_server(model_dict, cfg, args):
             )
             torchaudio.save(output_audio_path, audio, sample_rate)
             logger.info(f"Audio saved to: {output_audio_path}")
-            if args.save_video:
+            if save_video:
                 merge_audio_video(output_audio_path, video_path, output_video_path)
             logger.info(f"Video with audio saved to: {output_video_path}")
             return jsonify({"audio_path": output_audio_path, "video_path": output_video_path})
