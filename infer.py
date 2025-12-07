@@ -11,6 +11,7 @@ from hunyuanvideo_foley.utils.model_utils import load_model
 from hunyuanvideo_foley.utils.feature_utils import feature_process
 from hunyuanvideo_foley.utils.model_utils import denoise_process
 from hunyuanvideo_foley.utils.media_utils import merge_audio_video
+from transformers import AutoModel, AutoTokenizer
 
 def set_manual_seed(global_seed):
     random.seed(global_seed)
@@ -102,6 +103,11 @@ def parse_args():
         "--enable_api_server",
         action="store_true",
         help="Enable API server for inference"
+    )
+    input_group.add_argument(
+        "--preload_mode",
+        action="store_true",
+        help="Enable preload mode for API server"
     )
     parser.add_argument(
         "--single_prompt",
@@ -295,12 +301,23 @@ def run_api_server(model_dict, cfg, args):
 
     app.run(host="0.0.0.0", port=5000)
 
+def preload_models():
+    AutoModel.from_pretrained("google/siglip2-base-patch16-512")
+    logger.info("SigLIP2 model loaded")
+    AutoTokenizer.from_pretrained("laion/larger_clap_general")
+    logger.info("CLAP model loaded")
+    return
+
 def main():
     set_manual_seed(1)
     args = parse_args()
 
     logger.remove()
     logger.add(lambda msg: print(msg, end=''), level=args.log_level)
+
+    if args.preload_mode:
+        preload_models()
+        return
 
     device = setup_device(args.device, args.gpu_id)
 
